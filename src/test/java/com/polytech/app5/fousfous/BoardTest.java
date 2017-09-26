@@ -1,8 +1,18 @@
 package com.polytech.app5.fousfous;
 
+import com.polytech.app5.fousfous.play.Move;
 import junit.framework.*;
 
 public final class BoardTest extends TestCase {
+
+    public void testPlayRemake() {
+        final Board board = new Board();
+        board.pushPlay(new Move(new Position(0, 0), new Position(5, 5)));
+        System.out.println(board);
+        board.popPlay();
+        board.popPlay();
+        System.out.println(board);
+    }
 
     public void testPositionToLinear() {
         assertPositionToLinear(0, 0, 0);
@@ -25,9 +35,11 @@ public final class BoardTest extends TestCase {
     }
 
     public void assertPositionToLinear(final int x, final int y, final int index) {
-        final Board board = new Board();
         final Position cp = new Position(x, y);
-        final int lp = board.getLinearPosition(cp);
-        assertEquals(lp, index);
+        final Index lp = cp.toLinear();
+        final Position lpToCp = lp.toPosition();
+        assertEquals(lp.value, index);
+        assertEquals(cp.x, lpToCp.x);
+        assertEquals(cp.y, lpToCp.y);
     }
 }

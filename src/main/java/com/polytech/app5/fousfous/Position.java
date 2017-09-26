@@ -10,6 +10,11 @@ public final class Position {
         this.y = y;
     }
 
+    public Index toLinear() {
+        return new Index(x / 2 + y * (Board.BOARD_SIZE / 2));
+    }
+
+    @Override
     public String toString() {
         return "" + (char) ('A' + x) + y;
     }
