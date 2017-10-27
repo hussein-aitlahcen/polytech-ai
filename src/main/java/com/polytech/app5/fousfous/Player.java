@@ -15,6 +15,17 @@ public enum Player {
         return this.id == WHITE.id ? BLACK : WHITE;
     }
 
+    public static Player fromPattern(final String name) {
+        switch (name) {
+        case "noir":
+            return BLACK;
+        case "blanc":
+            return WHITE;
+        default:
+            return NONE;
+        }
+    }
+
     @Override
     public String toString() {
         return this.name;

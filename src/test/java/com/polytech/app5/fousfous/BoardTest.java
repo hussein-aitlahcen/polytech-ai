@@ -2,16 +2,36 @@ package com.polytech.app5.fousfous;
 
 import com.polytech.app5.fousfous.play.Move;
 import junit.framework.*;
+import java.util.*;
 
 public final class BoardTest extends TestCase {
 
+    public void testPossibleMoves() {
+        final Board board = new Board();
+        System.out.println(Arrays.toString(board.getPossibleMoves(Player.WHITE).toArray()));
+    }
+
     public void testPlayRemake() {
         final Board board = new Board();
-        board.pushPlay(new Move(new Position(0, 0), new Position(5, 5)));
-        System.out.println(board);
+        final String initialState = board.toString();
+        board.pushPlay(new Move(new Position("A1"), new Position("H8")));
         board.popPlay();
         board.popPlay();
-        System.out.println(board);
+        assertEquals(initialState, board.toString());
+    }
+
+    public void testPositionPattern() {
+        assertPositionPattern("A1", 0, 0);
+        assertPositionPattern("A2", 0, 1);
+        assertPositionPattern("C5", 2, 4);
+        assertPositionPattern("H8", 7, 7);
+        assertPositionPattern("H1", 7, 0);
+    }
+
+    public void assertPositionPattern(final String pattern, final int x, final int y) {
+        final Position position = new Position(pattern);
+        assertEquals(x, position.x);
+        assertEquals(y, position.y);
     }
 
     public void testPositionToLinear() {

@@ -5,6 +5,12 @@ import com.polytech.app5.fousfous.Pawn;
 import com.polytech.app5.fousfous.Position;
 
 public final class Move implements Play {
+
+    public static Move fromPattern(final String pattern) {
+        final String[] positions = pattern.split("-");
+        return new Move(new Position(positions[0]), new Position(positions[1]));
+    }
+
     public final Position from;
     public final Position to;
 
@@ -31,7 +37,19 @@ public final class Move implements Play {
         board.set(b.toLinear(), pawn);
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null)
+            return false;
+        if (obj instanceof Move) {
+            final Move move = (Move) obj;
+            return move.from.equals(from) && move.to.equals(to);
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
-        return "(move: " + from + "-" + to + ")";
+        return from + "-" + to;
     }
 }
