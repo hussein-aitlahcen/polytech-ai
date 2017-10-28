@@ -3,6 +3,8 @@ package com.polytech.app5.fousfous;
 import com.polytech.app5.fousfous.play.Move;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.io.IOException;
+import java.nio.file.*;
 
 public final class PlateauFousFous implements Partie1 {
 
@@ -31,11 +33,23 @@ public final class PlateauFousFous implements Partie1 {
     }
 
     public void setFromFile(String fileName) {
-
+        try {
+            List<String> loadedData = Files.readAllLines(Paths.get(fileName));
+            this.board = Board.fromSave(loadedData);
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Impossible de sauvegarder le fichier de jeu.");
+        }
     }
 
     public void saveToFile(String fileName) {
-
+        final String savedData = this.board.save();
+        try {
+            Files.write(Paths.get(fileName), savedData.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("Impossible de charger le fichier de jeu.");
+        }
     }
 
     public String[] mouvementsPossibles(final String playerPattern) {

@@ -3,18 +3,32 @@ package com.polytech.app5.fousfous;
 import com.polytech.app5.fousfous.play.Move;
 import junit.framework.*;
 import java.util.*;
+import java.io.IOException;
+import java.nio.file.*;
 
 public final class BoardTest extends TestCase {
 
+    public void testSaveFormat() throws IOException {
+        final String filePath = "./game.txt";
+        final Board board = new Board();
+        final String savedData = board.save();
+        Files.write(Paths.get(filePath), savedData.getBytes());
+        System.out.println(savedData);
+        final List<String> loadedData = Files.readAllLines(Paths.get(filePath));
+        final Board reloaded = Board.fromSave(loadedData);
+        assertEquals(board.toString(), reloaded.toString());
+    }
+
     public void testPossibleMoves() {
         final Board board = new Board();
+        System.out.println(board);
         System.out.println(Arrays.toString(board.getPossibleMoves(Player.WHITE).toArray()));
     }
 
     public void testPlayRemake() {
         final Board board = new Board();
         final String initialState = board.toString();
-        board.pushPlay(new Move(new Position("A1"), new Position("H8")));
+        board.pushPlay(new Move(new Position("A1"), new Position("B2")));
         board.popPlay();
         board.popPlay();
         assertEquals(initialState, board.toString());

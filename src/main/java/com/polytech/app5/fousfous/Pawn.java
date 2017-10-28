@@ -12,6 +12,6 @@ public final class Pawn {
 
     @Override
     public String toString() {
-        return "player=" + owner;
+        return this.owner.toString();
     }
 }

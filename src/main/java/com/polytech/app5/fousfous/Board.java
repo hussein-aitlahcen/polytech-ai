@@ -9,12 +9,42 @@ public final class Board {
     public static final int PAWN_PER_LINE = 4;
     public static final int TOTAL_PAWN = BOARD_SIZE * PAWN_PER_LINE;
 
+    public static Board fromSave(List<String> lines) {
+        final Pawn[][] game2d = new Pawn[BOARD_SIZE][BOARD_SIZE];
+        for (final String line : lines) {
+            if (!line.startsWith("%")) {
+                final String[] data = line.split(" ");
+                final int y = Integer.parseInt(data[0]) - 1;
+                final String content = data[1];
+                for (int x = 0; x < content.length(); x++) {
+                    final Position position = new Position(x, y);
+                    final Pawn pawn = new Pawn(Player.fromName(content.charAt(x)));
+                    game2d[position.x][position.y] = pawn;
+                }
+            }
+        }
+        return from2d(game2d);
+    }
+
+    public static Board from2d(Pawn[][] game2d) {
+        final Pawn[] flatGame = new Pawn[TOTAL_PAWN];
+        for (int i = 0; i < TOTAL_PAWN; i++) {
+            final Position position = new Index(i).toPosition();
+            flatGame[i] = game2d[position.x][position.y];
+        }
+        return new Board(flatGame);
+    }
+
     public final Pawn[] game;
     private final Stack<Play> plays;
 
-    public Board() {
-        this.game = new Pawn[TOTAL_PAWN];
+    public Board(Pawn[] game) {
         this.plays = new Stack<Play>();
+        this.game = game;
+    }
+
+    public Board() {
+        this(new Pawn[TOTAL_PAWN]);
         for (int i = 0; i < TOTAL_PAWN; i++) {
             final Index index = new Index(i);
             final Position position = index.toPosition();
@@ -50,13 +80,11 @@ public final class Board {
 
     public void pushPlay(final Play play) {
         play.apply(this);
-        System.out.println("push play: " + play);
         this.plays.push(play);
     }
 
     public void popPlay() {
         final Play play = this.plays.pop();
-        System.out.println("pop play: " + play);
         play.unapply(this);
     }
 
@@ -67,12 +95,12 @@ public final class Board {
             final Position nextPosition = position.next(direction, step);
             if (!nextPosition.isValid())
                 break;
-            final Pawn pawn = get(nextPosition);
+            final Pawn pawn = this.get(nextPosition);
             if (pawn.owner != Player.NONE) {
                 break;
             }
-            for (Direction perpendicular : direction.getPerpendicular()) {
-                final Move possibleAttack = getPossibleAttack(player, nextPosition, perpendicular);
+            for (final Direction perpendicular : direction.getPerpendicular()) {
+                final Move possibleAttack = this.getPossibleAttack(player, nextPosition, perpendicular);
                 if (possibleAttack != null) {
                     possibleThreats.add(new Move(position, nextPosition));
                 }
@@ -89,7 +117,7 @@ public final class Board {
             final Position nextPosition = position.next(direction, step);
             if (!nextPosition.isValid())
                 break;
-            final Pawn pawn = get(nextPosition);
+            final Pawn pawn = this.get(nextPosition);
             if (pawn.owner == player) {
                 break;
             }
@@ -102,9 +130,11 @@ public final class Board {
     }
 
     public List<Move> getPossibleAttacks(final Player player, final Position position) {
-        final List<Move> attacks = new ArrayList<Move>(Arrays.asList(getPossibleAttack(player, position, Direction.SE),
-                getPossibleAttack(player, position, Direction.SW), getPossibleAttack(player, position, Direction.NE),
-                getPossibleAttack(player, position, Direction.NW)));
+        final List<Move> attacks = new ArrayList<Move>(
+                Arrays.asList(this.getPossibleAttack(player, position, Direction.SE),
+                        this.getPossibleAttack(player, position, Direction.SW),
+                        this.getPossibleAttack(player, position, Direction.NE),
+                        this.getPossibleAttack(player, position, Direction.NW)));
         attacks.removeIf(attack -> attack == null);
         return attacks;
     }
@@ -113,21 +143,54 @@ public final class Board {
         final HashSet<Move> possibleMoves = new HashSet<Move>();
         for (int i = 0; i < game.length; i++) {
             final Index index = new Index(i);
-            final Pawn pawn = get(index);
+            final Pawn pawn = this.get(index);
             if (pawn.owner == player) {
                 final Position position = index.toPosition();
-                final List<Move> possibleAttacks = getPossibleAttacks(player, position);
+                System.out.println("i=" + i + ", pos=" + position + ", player=" + player + ", pawn=" + pawn);
+                final List<Move> possibleAttacks = this.getPossibleAttacks(player, position);
                 if (possibleAttacks.size() > 0) {
                     possibleMoves.addAll(possibleAttacks);
                 } else {
-                    possibleMoves.addAll(getPossibleThreats(player, position, Direction.NE));
-                    possibleMoves.addAll(getPossibleThreats(player, position, Direction.NW));
-                    possibleMoves.addAll(getPossibleThreats(player, position, Direction.SE));
-                    possibleMoves.addAll(getPossibleThreats(player, position, Direction.SW));
+                    for (final Direction direction : Direction.values()) {
+                        possibleMoves.addAll(this.getPossibleThreats(player, position, direction));
+                    }
                 }
             }
         }
         return possibleMoves;
+    }
+
+    public Pawn[][] transform2d() {
+        final Pawn[][] game2d = new Pawn[BOARD_SIZE][BOARD_SIZE];
+        for (int i = 0; i < game2d.length; i++) {
+            final Pawn[] line = game2d[i];
+            for (int j = 0; j < line.length; j++) {
+                line[j] = Pawn.PLACEHOLDER;
+            }
+        }
+        for (int i = 0; i < this.game.length; i++) {
+            final Position position = new Index(i).toPosition();
+            final Pawn pawn = this.get(position);
+            game2d[position.x][position.y] = pawn;
+        }
+        return game2d;
+    }
+
+    public String save() {
+        final StringBuilder sb = new StringBuilder();
+        final Pawn[][] game2d = this.transform2d();
+        sb.append("% ABCDEFGH\n");
+        for (int i = 0; i < game2d.length; i++) {
+            final int lineNumber = i + 1;
+            sb.append(lineNumber).append(" ");
+            for (int j = 0; j < game2d[i].length; j++) {
+                sb.append(game2d[i][j]);
+            }
+            sb.append(" ").append(lineNumber);
+            sb.append("\n");
+        }
+        sb.append("% ABCDEFGH\n");
+        return sb.toString();
     }
 
     public String toString() {

@@ -1,12 +1,12 @@
 package com.polytech.app5.fousfous;
 
 public enum Player {
-    WHITE(0, "W"), BLACK(1, "B"), NONE(-1, "-");
+    WHITE(0, 'b'), BLACK(1, 'n'), NONE(-1, '-');
 
-    public final String name;
+    public final char name;
     public final int id;
 
-    private Player(final int id, final String name) {
+    private Player(final int id, final char name) {
         this.id = id;
         this.name = name;
     }
@@ -15,8 +15,17 @@ public enum Player {
         return this.id == WHITE.id ? BLACK : WHITE;
     }
 
-    public static Player fromPattern(final String name) {
-        switch (name) {
+    public static Player fromName(final char name) {
+        for (final Player player : values()) {
+            if (player.name == name) {
+                return player;
+            }
+        }
+        return NONE;
+    }
+
+    public static Player fromPattern(final String pattern) {
+        switch (pattern) {
         case "noir":
             return BLACK;
         case "blanc":
@@ -28,6 +37,6 @@ public enum Player {
 
     @Override
     public String toString() {
-        return this.name;
+        return this.name + "";
     }
 }
