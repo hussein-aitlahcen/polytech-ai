@@ -157,6 +157,7 @@ public final class Board {
                 }
             }
         }
+        System.out.println("Possible moves computed.");
         return possibleMoves;
     }
 

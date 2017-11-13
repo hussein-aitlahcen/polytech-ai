@@ -55,13 +55,18 @@ public final class PlateauFousFous implements Partie1 {
     public String[] mouvementsPossibles(final String playerPattern) {
         final Player player = Player.fromPattern(playerPattern);
         final Set<Move> possibleMoves = board.getPossibleMoves(player);
-        return Arrays.asList(possibleMoves.stream().map(move -> move.toString()))
-                .toArray(new String[possibleMoves.size()]);
+        return possibleMoves.stream().map(move -> move.toString())
+                .toArray(String[]::new);
     }
 
     public void play(final String movementPattern, final String playerPattern) {
         final Player player = Player.fromPattern(playerPattern);
         final Move move = Move.fromPattern(movementPattern);
         board.pushPlay(move);
+    }
+
+    @Override
+    public String toString() {
+        return this.board.save();
     }
 }
