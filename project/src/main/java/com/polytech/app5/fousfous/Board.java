@@ -3,6 +3,7 @@ package com.polytech.app5.fousfous;
 import com.polytech.app5.fousfous.play.Move;
 import com.polytech.app5.fousfous.play.Play;
 import java.util.*;
+import java.util.function.*;
 
 public final class Board {
     public static final int BOARD_SIZE = 8;
@@ -88,6 +89,46 @@ public final class Board {
         play.unapply(this);
     }
 
+    public int markPlay() {
+        return this.plays.size();
+    }
+
+    public void backPlay(final int moves) {
+        while(this.plays.size() > moves) {
+            this.popPlay();
+        }
+    }
+
+    public <T> T playAndCancel(final Play play, final Function<Board, T> f) {
+        return this.rewindAction((__) -> {
+                this.pushPlay(play);
+                return f.apply(this);
+            });
+    }
+
+    public <T> T rewindAction(final Function<Board, T> f) {
+         final int mark = this.markPlay();
+        final T result = f.apply(this);
+        this.backPlay(mark);
+        return result;
+    }
+
+
+    public <T, K> K getLineFactor(final Player player, final Position position, Function<Position, T> projection, BiFunction<K, T, K> reduction, K initialState) {
+        K aggregat = initialState;
+        for(final Direction direction: Direction.values()) {
+            for(int i = 0; i < BOARD_SIZE; i++) {
+                final int step = i + 1;
+                final Position nextPosition = position.next(direction, step);
+                if(!nextPosition.isValid()) {
+                    break;
+                }
+                aggregat = reduction.apply(aggregat, projection.apply(nextPosition));
+            }
+        }
+        return aggregat;
+    }
+
     public List<Move> getPossibleThreats(final Player player, final Position position, final Direction direction) {
         final List<Move> possibleThreats = new ArrayList<Move>();
         for (int i = 0; i < BOARD_SIZE; i++) {
@@ -129,6 +170,22 @@ public final class Board {
         return attack;
     }
 
+    public int getNumberOfPawns(final Player player) {
+        int nb = 0;
+        for(int i = 0 ; i < this.game.length; i++) {
+            if(game[i].owner == player) {
+                nb++;
+            }
+        }
+        return nb;
+    }
+
+    public boolean isAttackMovement(final Move move) {
+        final Pawn fromPawn = this.get(move.from);
+        final Pawn toPawn = this.get(move.to);
+        return fromPawn.owner != toPawn.owner && toPawn.owner != Player.NONE;
+    }
+
     public List<Move> getPossibleAttacks(final Player player, final Position position) {
         final List<Move> attacks = new ArrayList<Move>(
                 Arrays.asList(this.getPossibleAttack(player, position, Direction.SE),
@@ -146,7 +203,6 @@ public final class Board {
             final Pawn pawn = this.get(index);
             if (pawn.owner == player) {
                 final Position position = index.toPosition();
-                System.out.println("i=" + i + ", pos=" + position + ", player=" + player + ", pawn=" + pawn);
                 final List<Move> possibleAttacks = this.getPossibleAttacks(player, position);
                 if (possibleAttacks.size() > 0) {
                     possibleMoves.addAll(possibleAttacks);
@@ -157,8 +213,43 @@ public final class Board {
                 }
             }
         }
-        System.out.println("Possible moves computed.");
         return possibleMoves;
+    }
+
+    public <T, K> K forEachPawn(final Player player, final Function<Position, T> projection, final BiFunction<K, T, K> reduction, final K initial) {
+        K aggregat = initial;
+        for(int i = 0; i < game.length; i++) {
+            final Index index = new Index(i);
+            final Pawn pawn = this.get(index);
+            if(pawn.owner == player) {
+                aggregat = reduction.apply(aggregat, projection.apply(index.toPosition()));
+            }
+        }
+        return aggregat;
+    }
+
+    public int getAdjacentFactor(final Player player) {
+        return this.<Integer, Integer>forEachPawn(player, (position) -> {
+                return this.getLineFactor(player, position, (nextPosition) -> {
+                        final Pawn pawn = this.get(nextPosition);
+                        if(pawn.owner == player) {
+                            return 1;
+                        }
+                        return 0;
+                    }, (acc, current) -> acc + current, 0);
+            }, (acc, current) -> acc + current, 0);
+    }
+
+    public Player winner() {
+        final int blackPawns = getNumberOfPawns(Player.WHITE);
+        final int whitePawns = getNumberOfPawns(Player.BLACK);
+        if(blackPawns == 0 && whitePawns > 0) {
+            return Player.WHITE;
+        }
+        else if(whitePawns == 0 && blackPawns > 0) {
+            return Player.BLACK;
+        }
+        return Player.NONE;
     }
 
     public Pawn[][] transform2d() {
@@ -172,7 +263,7 @@ public final class Board {
         for (int i = 0; i < this.game.length; i++) {
             final Position position = new Index(i).toPosition();
             final Pawn pawn = this.get(position);
-            game2d[position.x][position.y] = pawn;
+            game2d[position.y][position.x] = pawn;
         }
         return game2d;
     }

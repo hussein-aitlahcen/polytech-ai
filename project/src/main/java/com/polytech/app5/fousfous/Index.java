@@ -9,7 +9,7 @@ public final class Index {
 
     public Position toPosition() {
         final int boardHalfSize = Board.BOARD_SIZE / 2;
-        return new Position((int) Math.floor(this.value * 2 % Board.BOARD_SIZE + this.value / boardHalfSize % 2),
+        return new Position((int) Math.floor(this.value * 2 % Board.BOARD_SIZE + (1 - (this.value / boardHalfSize % 2))),
                 this.value / boardHalfSize);
     }
 }

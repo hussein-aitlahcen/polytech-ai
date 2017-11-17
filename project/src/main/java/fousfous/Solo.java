@@ -1,6 +1,6 @@
 package fousfous;
 
-
+import com.polytech.app5.fousfous.*;
 import java.util.Date;
 
 /**
@@ -47,8 +47,7 @@ public class Solo {
      */
     private static IJoueur getDefaultPlayer(String s) {
         System.out.println(s + " : defaultPlayer");
-        // vous devez faire qq chose comme return new MonMeilleurJoueur();
-        return new com.polytech.app5.fousfous.Controller();
+        return new Controller();
     }
 
     /**

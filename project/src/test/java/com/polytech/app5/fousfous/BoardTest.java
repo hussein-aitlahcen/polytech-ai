@@ -16,6 +16,7 @@ public final class BoardTest extends TestCase {
         System.out.println(savedData);
         final List<String> loadedData = Files.readAllLines(Paths.get(filePath));
         final Board reloaded = Board.fromSave(loadedData);
+        System.out.println(reloaded.toString());
         assertEquals(board.toString(), reloaded.toString());
     }
 
@@ -49,23 +50,23 @@ public final class BoardTest extends TestCase {
     }
 
     public void testPositionToLinear() {
-        assertPositionToLinear(0, 0, 0);
-        assertPositionToLinear(2, 0, 1);
-        assertPositionToLinear(4, 0, 2);
-        assertPositionToLinear(6, 0, 3);
-        assertPositionToLinear(1, 1, 4);
-        assertPositionToLinear(3, 1, 5);
-        assertPositionToLinear(5, 1, 6);
-        assertPositionToLinear(7, 1, 7);
-        assertPositionToLinear(0, 2, 8);
-        assertPositionToLinear(2, 2, 9);
-        assertPositionToLinear(4, 2, 10);
-        assertPositionToLinear(6, 2, 11);
-        assertPositionToLinear(1, 3, 12);
-        assertPositionToLinear(3, 3, 13);
-        assertPositionToLinear(5, 3, 14);
-        assertPositionToLinear(7, 3, 15);
-        assertPositionToLinear(0, 4, 16);
+        assertPositionToLinear(1, 0, 0);
+        assertPositionToLinear(3, 0, 1);
+        assertPositionToLinear(5, 0, 2);
+        assertPositionToLinear(7, 0, 3);
+        assertPositionToLinear(0, 1, 4);
+        assertPositionToLinear(2, 1, 5);
+        assertPositionToLinear(4, 1, 6);
+        assertPositionToLinear(6, 1, 7);
+        assertPositionToLinear(1, 2, 8);
+        assertPositionToLinear(3, 2, 9);
+        assertPositionToLinear(5, 2, 10);
+        assertPositionToLinear(7, 2, 11);
+        assertPositionToLinear(0, 3, 12);
+        assertPositionToLinear(2, 3, 13);
+        assertPositionToLinear(4, 3, 14);
+        assertPositionToLinear(6, 3, 15);
+        assertPositionToLinear(1, 4, 16);
     }
 
     public void assertPositionToLinear(final int x, final int y, final int index) {

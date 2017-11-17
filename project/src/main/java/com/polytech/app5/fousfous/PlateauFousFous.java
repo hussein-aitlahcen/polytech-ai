@@ -10,8 +10,8 @@ public final class PlateauFousFous implements Partie1 {
 
     private Board board;
 
-    public PlateauFousFous() {
-        this.board = new Board();
+    public PlateauFousFous(final Board board) {
+        this.board = board;
     }
 
     public boolean estValide(final String movementPattern, final String playerPattern) {
