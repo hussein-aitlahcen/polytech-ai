@@ -15,7 +15,7 @@ public final class Controller implements IJoueur {
     private Player player;
 
     public Controller() {
-        this(Heuristic.BASIC_WIN_LOSE, Algorithm.NEGAMAX);
+        this(Heuristic.BASIC_WIN_LOSE, Algorithm.TEUBE);
     }
 
     public Controller(final Heuristic heuristic, final Algorithm algorithm) {
