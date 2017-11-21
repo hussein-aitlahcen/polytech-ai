@@ -228,21 +228,24 @@ public final class Board {
         return aggregat;
     }
 
-    public int getAdjacentFactor(final Player player) {
+    public int getAlignmentFactor(final Player player) {
         return this.<Integer, Integer>forEachPawn(player, (position) -> {
                 return this.getLineFactor(player, position, (nextPosition) -> {
                         final Pawn pawn = this.get(nextPosition);
                         if(pawn.owner == player) {
                             return 1;
                         }
+                        else if(pawn.owner == player.opponent()) {
+                            return -1;
+                        }
                         return 0;
                     }, (acc, current) -> acc + current, 0);
-            }, (acc, current) -> acc + current, 0);
+            }, Math::max, Integer.MIN_VALUE);
     }
 
     public Player winner() {
-        final int blackPawns = getNumberOfPawns(Player.WHITE);
-        final int whitePawns = getNumberOfPawns(Player.BLACK);
+        final int blackPawns = getNumberOfPawns(Player.BLACK);
+        final int whitePawns = getNumberOfPawns(Player.WHITE);
         if(blackPawns == 0 && whitePawns > 0) {
             return Player.WHITE;
         }
